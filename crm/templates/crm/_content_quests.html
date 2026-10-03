@@ -1,0 +1,128 @@
+{% load static %}
+<div class="content-inner">
+    <!-- Page Header-->
+    <header class="page-header">
+        <div class="container-fluid">
+            <h2 class="no-margin-bottom">Работа с анкетами</h2>
+        </div>
+    </header>
+    <ul class="breadcrumb">
+        <div class="container-fluid">
+            <li class="breadcrumb-item"><a href="../">Начало</a></li>
+            <li class="breadcrumb-item"><a href="../quests/{{state_id}}">Анкеты</a></li>
+            <li class="breadcrumb-item active">{{ stat_ankets }} (страница {{ current_page }} из {{ anket_list.paginator.num_pages }})</li>
+        </div>
+    </ul>
+    <!-- Paginator Section-->
+        <section class="dashboard-counts no-padding-bottom">
+            <div class="container-fluid">
+
+                    <nav aria-label="Paginator">
+                      <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not anket_list.has_previous %} disabled {% endif %}">
+                            <a class="page-link" href="{{ prev_page_url }}">&laquo;</a></li>
+                          {% for e_item in e_ankets %}
+                          <li class="page-item
+                            {% if e_item == current_page %} active  {% endif %}
+                            {% if e_item == '…' %} disabled {% endif %}">
+                              <a class="page-link" href="?page={{ e_item }}">{{e_item}}</a>
+                          </li>
+                          {% endfor %}
+                        <li class="page-item {% if not anket_list.has_next %} disabled {% endif %}">
+                            <a class="page-link" href="{{ next_page_url }}">&raquo;</a></li>
+                      </ul>
+                    </nav>
+                </div>
+
+        </section>
+
+    <!-- Forms Section-->
+    <section class="tables">
+        <form action="/quest/{{ ext_id }}" method="post">
+            <div class="container-fluid">
+                <div class="row">
+                    {% if anket_list %}
+                    {% for item in anket_list %}
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-close">
+                                <div class="dropdown">
+                                    <button type="button" id="closeCard" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" class="dropdown-toggle"><i
+                                            class="fa fa-ellipsis-v"></i></button>
+                                    <div aria-labelledby="closeCard" class="dropdown-menu has-shadow">
+                                        <a href="../quest_hide/{{ item.external_id }}" class="dropdown-item "><i class="fa fa-times"></i>Скрыть</a></div>
+                                </div>
+                            </div>
+                            <div class="card-header d-flex align-items-center">
+                                {% if item.state == 0 %}
+                                <div class="badge badge-rounded bg-red">
+                                    Новая
+                                </div>&nbsp;&nbsp;&nbsp;
+                                {% else %}
+                                <div class="badge badge-rounded bg-green">
+                                    Оформленная
+                                </div>&nbsp;&nbsp;&nbsp;
+                                {% endif %}
+
+                                <h3 class="h4">{{ item.FIO }}</h3>
+                            </div>
+                            <div class="card-body">
+                                <label class="form-control-label">ID: {{ item.external_id }} / {{ item.date_filling }}</label>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Дата рождения:</label>
+                                        <p>{{ item.DOB }}</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Контактный телефон:</label>
+                                        <p>{{ item.tel }}</p>
+                                    </div>
+                                    <!--<div class="form-group">
+                                        <label class="form-control-label">Адрес:</label>
+                                        <p>{{ item.addr }}</p>
+                                    </div>-->
+                                    <a class="btn btn-primary" href="../quest/{{ item.external_id }}">Оформить</a>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    
+        <!-- Paginator Section-->
+        <section class="dashboard-counts no-padding-bottom">
+            <div class="container-fluid">
+                <div class="row bg-white has-shadow">
+
+                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                        <div class="btn-group mr-2" role="group" aria-label="First group">
+                            {% if prev_page_url %}<a class="btn btn-secondary"
+                                                     href="{{ prev_page_url }}">⟵</a>{% endif %}
+                            <a class="btn btn-secondary disabled" role="button" aria-disabled="true"
+                               href="">Страница {{ current_page }} из {{ anket_list.paginator.num_pages }}</a>
+                            {% if next_page_url %}<a class="btn btn-secondary"
+                                                     href="{{ next_page_url }}">⟶</a>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                         <div class="btn-group" role="group" aria-label="First group">
+                            {% for e_item in e_ankets %}
+                            <a class="btn btn-secondary
+                            {% if e_item == current_page %} active disabled {% endif %}
+                            {% if e_item == '…' %} disabled {% endif %}"
+                               href="?page={{ e_item }}">{{e_item}}</a>
+                            {% endfor %}
+                        </div>
+                        </div>
+
+                </div>
+            </div>
+        </section>
+        </section>
+</div>

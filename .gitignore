@@ -1,0 +1,12 @@
+/hzClinic/settings_local.py
+/crm/migrations/
+/crm/tmpls/
+/crm/docs/
+/crm/log/
+/crm/122023_load.csv
+/hzapi/migrations/
+/users/migrations/
+/hz.sqlite3
+/log/
+/.venv/
+/.idea/

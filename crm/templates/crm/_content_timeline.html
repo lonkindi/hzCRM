@@ -1,0 +1,236 @@
+{% load static %}
+<div class="content-inner">
+    <!-- Page Header-->
+    <header class="page-header">
+        <div class="container-fluid">
+            <h2 class="no-margin-bottom">Управление расписанием</h2>
+        </div>
+    </header>
+    <ul class="breadcrumb">
+        <div class="container-fluid">
+            <li class="breadcrumb-item"><a href="../">Главная</a></li>
+            <li class="breadcrumb-item active">Расписание операций (Страница {{ current_page }} из
+                {{b_rec.paginator.num_pages }})
+            </li>
+        </div>
+    </ul>
+
+    <section class="forms">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Candidate Form-->
+                <div class="col-lg-12 mb-2">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center">
+                            <h4>Просмотр расписания за период</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="ExportForm" action="/export_tl/" method="post" class="form-inline">
+                                {%csrf_token%}
+                                <div class="form-group mb-2">
+                                    <label for="start_date" class="col-sm-2 col-form-label">Начало периода</label>
+                                    <div class="col-sm-8">
+                                        <input id="start_date" name="start_date" type="date" class="form-control" value="{{ b_rec.0.0.0|date:"Y-m-d" }}">
+                                    </div>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label for="end_date" class="col-sm-2 col-form-label">Конец периода</label>
+                                    <div class="col-sm-8">
+                                        {% with last_day=b_rec.0|last %}
+                                        <input id="end_date" name="end_date" type="date" class="form-control" value="{{ last_day.0|date:"Y-m-d" }}">
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                <input class="btn btn-primary mb-2" type="submit" value="Сформировать">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Form-->
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Section-->
+    <section class="tables">
+        <div class="container-fluid">
+            <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <div class="col-sm-8">
+                        <h4>Расписание операций</h4>
+                            {{ b_rec.0.0.0|date:"F" }}
+                            {{b_rec.0.0.0|date:"Y" }} г.
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Paginator Section-->
+                    <div class="col-sm-12 mb-2">
+                        <nav aria-label="Paginator">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item {% if not b_rec.has_previous %} disabled {% endif %}">
+                                    <a class="page-link" href="{{ prev_page_url }}">&laquo;</a></li>
+                                {% for e_item in enum_rec %}
+                                <li class="page-item
+                                        {% if e_item == current_page %} active {% endif %}
+                                        {% if e_item == '…' %} disabled {% endif %}">
+                                    <a class="page-link" href="?page={{ e_item }}">{{e_item}}</a>
+                                </li>
+                                {% endfor %}
+                                <li class="page-item {% if not b_rec.has_next %} disabled {% endif %}">
+                                    <a class="page-link" href="{{ next_page_url }}">&raquo;</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                        <table class="table table-bordered table-striped table-responsive">
+                            <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Ф.И.О.</th>
+                                <th>Операции</th>
+                                <th>Хирург</th>
+                                <th>Примечания</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for item in b_rec.0 %}
+                            {% if item.1 == '' %}
+                            <tr {% if item.0|date:"l" == 'Суббота' or item.0|date:"l" == 'Воскресенье' %}
+                            class="table-danger"
+                            {% endif %}
+                            >
+                                <td>
+                                    {% if item.0|date:"Y-m-d" >= today|date:"Y-m-d" %}
+                                    <a href="../recording/?date={{ item.0|date:"Y-m-d"}}" class="text-primary" uk-icon="icon: plus-circle"></a>
+                                    <a href="../recording/?date={{ item.0|date:"Y-m-d"}}" class="text-primary">{{ item.0|date:"d.m.Y" }}</a><br>
+                                    {{ item.0|date:"l" }}
+                                    {% else %}
+                                    {{ item.0|date:"d.m.Y" }}<br>
+                                    {{ item.0|date:"l" }}
+                                    {% endif %}
+                                </td>
+                             <td>Операций нет</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td class="table-dark" rowspan="{{item.1.count}}">
+                                    {% if item.0|date:"Y-m-d" >= today|date:"Y-m-d" %}
+                                    <a href="../recording/?date={{ item.0|date:"Y-m-d"}}" class="text-primary" uk-icon="icon: plus-circle"></a>
+                                    <a href="../recording/?date={{ item.0|date:"Y-m-d"}}" class="text-primary">{{ item.0|date:"d.m.Y" }}</a><br>
+                                    {{ item.0|date:"l" }}
+                                    {% else %}
+                                    {{ item.0|date:"d.m.Y" }}<br>
+                                    {{ item.0|date:"l" }}
+                                    {% endif %}
+                                     <div class="progress">
+                                        <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" role="progressbar"
+                                        class="progress-bar
+                                             {% if item.2 <= 1 %}
+                                               bg-success" style= "width:10%">
+                                               {% elif  item.2 > 1 and item.2 <= 3 %}
+                                               bg-success" style= "width:25%">
+                                               {% elif  item.2 > 3 and item.2 <= 5 %}
+                                               bg-success" style= "width:50%">
+                                               {% elif  item.2 > 5 and item.2 <= 8 %}
+                                               bg-warning" style= "width:75%">
+                                               {% elif  item.2 > 8 %}
+                                               bg-danger" style= "width:100%">
+                                               {% endif %}
+                                             </div>
+                                    </div>
+                                   <h1><span class="text-center badge badge-pill
+                                   {% if item.2 <= 5 %}
+                                   badge-success"
+                                   {% elif  item.2 > 5 and item.2 <= 8 %}
+                                   badge-warning"
+                                   {% elif  item.2 > 8 %}
+                                   badge-danger"
+                                   {% endif %}>{{ item.2 }}</span></h1>
+                                </td>
+                            {% for candidat in item.1 %}
+
+                                <td>
+                                    {% if item.0|date:"Y-m-d" >= today|date:"Y-m-d" %}
+                                    <a href="../updrecord/{{candidat.pk}}" class="text-success" uk-icon="icon: pencil"></a>
+                                    <a data-toggle="modal" data-target="#delModal{{candidat.pk}}" class="text-danger" uk-icon="icon: trash"></a>
+                                    {% endif %}
+                                    {{ candidat.Sname }} {{ candidat.Name }} {{ candidat.Mname }}<br>
+                                    {{ candidat.phoneNumber }}<br>
+                                    {% if candidat.medcard_candidate %}
+                                    <br>
+                                    <a href="../medcard/{{candidat.medcard_candidate.anket_id}}">Открыть медкарту</a>
+                                    {% else %}
+                                    <br>
+                                    <div class="text-danger" >Медкарта не оформлена</div>
+                                    {% endif%}
+                                </td>
+                                <td>
+                                    <ul class="p-3">
+                                    {% for oper in candidat.typeOpers.all %}
+                                    <li >{{ oper.name }} (≈ {{ oper.duration }} ч.)</li>
+                                    {% endfor %}
+                                    </ul>
+                                    <b>Общее время: {{ candidat.total_duration }} ч.</b>
+                                </td>
+                                <td>
+                                    {{ candidat.Doctor }}
+                                </td>
+                                <td>
+                                    {{ candidat.notes|linebreaks }}
+                                </td>
+                            </tr>
+        <!-- Modal-->
+        <div id="delModal{{candidat.pk}}" tabindex="-1" role="dialog" aria-labelledby="leModalLabel"
+             aria-hidden="true"
+             class="modal fade text-left">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 id="delModalLabel" class="modal-title text-danger"> Удаление кандидата на операцию # {{candidat.pk}}<br>
+                            <em>{{ candidat.Sname }} {{ candidat.Name }} {{ candidat.Mname }}</em><br>
+                            операция запланирована {{ item.0|date:"d.m.Y" }}
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Удалённую запись восстановить невозможно.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-dismiss="modal"
+                                class="btn btn-secondary">Отмена
+                        </button>
+                        <a class="btn btn-danger" href="../delrecord/{{candidat.pk}}">Удалить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+                            {% endfor %}
+                            {% endif %}
+                            {% endfor %}
+                             </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- Javascript files-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src={% static "CRM/js/tether.min.js" %}></script>
+<script src={% static "CRM/js/bootstrap.min.js" %}></script>
+<script src={% static "CRM/js/jquery.cookie.js" %}> </script>
+<script src={% static "CRM/js/jquery.validate.min.js" %}></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<script src={% static "CRM/js/charts-home.js" %}></script>
+<script src={% static "CRM/js/front.js" %}></script>
